@@ -1,0 +1,99 @@
+version: '3.7'
+services:
+  elasticsearch-node1:
+    image: hub.docker.local:5000/mobility-suite/common.bitnami.elasticsearch:7.16.2-debian-10-r0
+    environment:
+      - ELASTICSEARCH_CLUSTER_NAME=elasticsearch-cluster
+      - ELASTICSEARCH_CLUSTER_HOSTS=elasticsearch-node1,elasticsearch-node2,elasticsearch-node3
+      - ELASTICSEARCH_NODE_NAME=elasticsearch-node1
+      - ELASTICSEARCH_HEAP_SIZE=${HEAP_SIZE:-8g}
+      - ELASTICSEARCH_KEYS=s3.client.default.access_key=${MINIO_ACCESS_KEY};s3.client.default.secret_key=${MINIO_SECRET_KEY}
+    volumes:
+      - 'elasticsearch_node1_data${VV}:/bitnami'
+    networks:
+      - es-net
+      - traefik-net
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.es1==true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.elasticsearch.loadbalancer.server.port=9200"
+        - "traefik.http.routers.elasticsearch.entrypoints=elasticsearch"
+        - "traefik.http.routers.elasticsearch.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.elasticsearch.service=elasticsearch"
+
+  elasticsearch-node2:
+    image: hub.docker.local:5000/mobility-suite/common.bitnami.elasticsearch:7.16.2-debian-10-r0
+    environment:
+      - ELASTICSEARCH_CLUSTER_NAME=elasticsearch-cluster
+      - ELASTICSEARCH_CLUSTER_HOSTS=elasticsearch-node1,elasticsearch-node2,elasticsearch-node3
+      - ELASTICSEARCH_NODE_NAME=elasticsearch-node2
+      - ELASTICSEARCH_HEAP_SIZE=${HEAP_SIZE:-8g}
+      - ELASTICSEARCH_KEYS=s3.client.default.access_key=${MINIO_ACCESS_KEY};s3.client.default.secret_key=${MINIO_SECRET_KEY}
+    volumes:
+      - 'elasticsearch_node2_data${VV}:/bitnami'
+    networks:
+      - es-net
+      - traefik-net
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.es2==true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.elasticsearch.loadbalancer.server.port=9200"
+        - "traefik.http.routers.elasticsearch.entrypoints=elasticsearch"
+        - "traefik.http.routers.elasticsearch.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.elasticsearch.service=elasticsearch"
+
+  elasticsearch-node3:
+    image: hub.docker.local:5000/mobility-suite/common.bitnami.elasticsearch:7.16.2-debian-10-r0
+    environment:
+      - ELASTICSEARCH_CLUSTER_NAME=elasticsearch-cluster
+      - ELASTICSEARCH_CLUSTER_HOSTS=elasticsearch-node1,elasticsearch-node2,elasticsearch-node3
+      - ELASTICSEARCH_NODE_NAME=elasticsearch-node3
+      - ELASTICSEARCH_HEAP_SIZE=${HEAP_SIZE:-8g}
+      - ELASTICSEARCH_KEYS=s3.client.default.access_key=${MINIO_ACCESS_KEY};s3.client.default.secret_key=${MINIO_SECRET_KEY}
+    volumes:
+      - 'elasticsearch_node3_data${VV}:/bitnami'
+    networks:
+      - es-net
+      - traefik-net
+    deploy:
+      restart_policy:
+        delay: 10s
+        max_attempts: 10
+        window: 60s
+      placement:
+        constraints:
+          - node.labels.es3==true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.elasticsearch.loadbalancer.server.port=9200"
+        - "traefik.http.routers.elasticsearch.entrypoints=elasticsearch"
+        - "traefik.http.routers.elasticsearch.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.elasticsearch.service=elasticsearch"
+
+secrets:
+  connect_info.yaml:
+    file: connect_info.yaml
+
+volumes:
+  elasticsearch_node1_data${VV}:
+  elasticsearch_node2_data${VV}:
+  elasticsearch_node3_data${VV}:
+networks:
+  traefik-net:
+    external: true
+  es-net:
+    external: true
